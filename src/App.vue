@@ -64,7 +64,7 @@ function t(key: string) {
   <div class="z-10 flex min-h-screen w-full flex-col items-center justify-center text-white">
     <div v-show="backgroundLoaded"
       class="min-h-screen w-full overflow-hidden bg-black/40 transition-all duration-300 md:flex">
-      <UserProfile avatar="/favicon.png" username="QSLS" github="https://github.com/qingshanls" />
+      <UserProfile avatar="https://image.qingshanls.icu/file/1744967046467_000591.png" username="QSLS" github="https://github.com/qingshanls" />
       <div class="flex flex-1 items-center p-4 sm:px-10 sm:py-16">
         <div class="flex flex-col gap-4">
           <div>
