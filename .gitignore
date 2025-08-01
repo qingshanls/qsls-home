@@ -8,10 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-# dist
+dist
 dist-ssr
 *.local
-# vite.config.ts
+vite.config.ts
 
 # Editor directories and files
 .vscode/*
@@ -23,3 +23,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+dist/favicon.png
+dist/favicon2.png
+dist/index.html
+dist/assets/index-BefH9WYi.js
+dist/assets/index-BOiBcpTq.css
+dist/icon/game/arknights.png
+dist/icon/game/bluearchive.png
+dist/icon/game/genshin.png
+dist/icon/game/starrail.png
+dist/icon/game/zzz.png
+dist/favicon.png
+dist/favicon2.png
+dist/index.html
+dist/assets/index-BefH9WYi.js
+dist/assets/index-BOiBcpTq.css
+dist/icon/game/arknights.png
+dist/icon/game/bluearchive.png
+dist/icon/game/genshin.png
+dist/icon/game/starrail.png
+dist/icon/game/zzz.png
