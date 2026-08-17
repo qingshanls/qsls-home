@@ -1,69 +1,113 @@
 <script setup lang="ts">
-interface Dict {
-  [key: string]: string
-}
+import {
+  DEFAULT_GAME_STATUS,
+  BACKGROUND_IMAGE,
+  STATUS_API_URL,
+} from '@/config'
+
+/** 游戏状态键名类型 */
+type GameStatusKey = keyof typeof DEFAULT_GAME_STATUS
 
 const backgroundLoaded = ref(false)
-const backgroundImage = "https://image.qingshanls.icu/file/1744958267474_00006.jpg"
-const statusDict = ref<Dict>({
-  // 'homepage.status.genshin': '摆烂',
-  // 'homepage.status.starrail': '摆烂',
-  // 'homepage.status.zzz': '摆烂',
-  // 'homepage.status.arknights': 'c',
-})
+const backgroundFailed = ref(false)
+const backgroundImage = ref(import.meta.env.VITE_BACKGROUND_IMAGE || BACKGROUND_IMAGE)
+const statusDict = ref<Record<string, string>>({ ...DEFAULT_GAME_STATUS })
+
+/** 数据状态 */
+const apiLoading = ref(false)
+const apiError = ref(false)
 
 watch(backgroundLoaded, () => {
   if (backgroundLoaded.value) {
-    document.querySelector('#loading')?.classList.add('loaded')
-    setTimeout(() => {
-      document.querySelector('#loading')?.remove()
-    }, 1000)
+    const loadingEl = document.querySelector('#loading')
+    if (loadingEl) {
+      loadingEl.classList.add('loaded')
+      setTimeout(() => {
+        loadingEl.remove()
+      }, 1000)
+    }
   }
 })
 
-onMounted(() => {
-  setTimeout(() => {
-    backgroundLoaded.value = true
-  }, 5000)
+/** 预加载背景图片 */
+function loadBackgroundImage() {
+  const apiBg = import.meta.env.VITE_BACKGROUND_IMAGE
+  backgroundImage.value = apiBg || BACKGROUND_IMAGE
+
   const imgEl = new Image()
   imgEl.onload = () => {
     backgroundLoaded.value = true
     imgEl.remove()
   }
-  imgEl.src = backgroundImage
-  document.body.style.setProperty(
-    '--o-bg',
-    `url(${backgroundImage})`,
-  )
-  fetchRemoteConfig()
-})
+  imgEl.onerror = () => {
+    // 图片加载失败时仍然移除 loading，使用纯色背景兜底
+    backgroundFailed.value = true
+    backgroundLoaded.value = true
+    imgEl.remove()
+  }
+  imgEl.src = backgroundImage.value
 
-function fetchRemoteConfig() {
-  const keys = Object.keys(statusDict.value).join(',')
-  fetch(``)
-    .then(res => res.json())
-    .then((data: Dict) => {
-      for (const key in data) {
-        const value = data[key]
-        if (value === null)
-          return
+  // 设置 CSS 背景变量
+  document.body.style.setProperty('--o-bg', `url(${backgroundImage.value})`)
+}
+
+/** 获取远程游戏状态 */
+async function fetchRemoteConfig() {
+  const apiUrl = import.meta.env.VITE_STATUS_API_URL || STATUS_API_URL
+  if (!apiUrl)
+    return // 未配置 API 地址，使用本地默认值
+
+  apiLoading.value = true
+  apiError.value = false
+
+  try {
+    const res = await fetch(apiUrl)
+    if (!res.ok)
+      throw new Error(`HTTP ${res.status}`)
+
+    const data = await res.json()
+    for (const key in data) {
+      const value = data[key]
+      if (value !== null && typeof value === 'string') {
         statusDict.value[key] = value
       }
-    })
+    }
+  }
+  catch (e) {
+    console.error('获取远程状态失败:', e)
+    apiError.value = true
+    // 失败时回退到默认值
+    statusDict.value = { ...DEFAULT_GAME_STATUS }
+  }
+  finally {
+    apiLoading.value = false
+  }
 }
 
+/** 获取游戏状态文本 */
 function t(key: string) {
-  return statusDict.value[key]
+  return statusDict.value[key] || ''
 }
+
+onMounted(() => {
+  loadBackgroundImage()
+  fetchRemoteConfig()
+})
 </script>
 
 <template>
   <Transition name="bg-show">
-    <div v-show="backgroundLoaded" class="bg fixed left-0 top-0 z-[-1] h-screen w-screen" />
+    <div
+      v-show="backgroundLoaded"
+      class="bg fixed left-0 top-0 z-[-1] h-screen w-screen"
+      :class="{ 'bg-fallback': backgroundFailed }"
+    />
   </Transition>
   <div class="z-10 flex min-h-screen w-full flex-col items-center justify-center text-white">
-    <div v-show="backgroundLoaded"
-      class="min-h-screen w-full overflow-hidden bg-black/40 transition-all duration-300 md:flex">
+    <div
+      v-show="backgroundLoaded"
+      class="min-h-screen w-full overflow-hidden bg-black/40 transition-all duration-300 md:flex"
+    >
       <UserProfile avatar="favicon.png" username="QSLS" github="https://github.com/qingshanls" />
       <div class="flex flex-1 items-center p-4 sm:px-10 sm:py-16">
         <div class="flex flex-col gap-4">

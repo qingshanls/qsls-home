@@ -17,6 +17,12 @@ body {
   background-repeat: no-repeat;
 }
 
+/* 背景图片加载失败时的纯色兜底 */
+.bg-fallback {
+  background-image: none !important;
+  background-color: #1a1a2e !important;
+}
+
 /* Loading */
 
 .loaded {
